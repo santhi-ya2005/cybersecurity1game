@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Spin the Wheel - Cybersecurity Questions</title>
+  <style>
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      background: radial-gradient(circle at top, #1e3c72, #2a5298);
+      font-family: "Poppins", sans-serif;
+      color: #fff;
+    }
+    h1 {
+      margin-bottom: 20px;
+      font-size: 36px;
+      text-shadow: 2px 2px 10px rgba(0,0,0,0.5);
+      background: linear-gradient(90deg, #ff8a00, #e52e71);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .wheel-container {
+      position: relative;
+      width: 350px;
+      height: 350px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    .wheel {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      border: 12px solid #fff;
+      box-shadow: 0 0 40px rgba(255,255,255,0.5), inset 0 0 25px rgba(0,0,0,0.4);
+      background: conic-gradient(
+        #ff4d4d 0deg 60deg,
+        #ffcc00 60deg 120deg,
+        #4dff4d 120deg 180deg,
+        #4dd2ff 180deg 240deg,
+        #cc66ff 240deg 300deg,
+        #ff66b2 300deg 360deg
+      );
+      transition: transform 4s cubic-bezier(0.17, 0.67, 0.83, 0.67);
+    }
+    .pointer {
+      position: absolute;
+      top: -25px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 0;
+      height: 0;
+      border-left: 25px solid transparent;
+      border-right: 25px solid transparent;
+      border-bottom: 35px solid #fff;
+      filter: drop-shadow(0 0 10px #fff);
+    }
+    .btn {
+      margin-top: 40px;
+      border: none;
+      border-radius: 50px;
+      padding: 18px 50px;
+      font-size: 24px;
+      font-weight: bold;
+      color: #fff;
+      background: linear-gradient(90deg, #ff0080, #ff8a00);
+      cursor: pointer;
+      transition: 0.3s;
+      box-shadow: 0 0 25px rgba(0,0,0,0.5), 0 0 15px rgba(255,255,255,0.4);
+    }
+    .btn:hover {
+      transform: scale(1.1);
+      box-shadow: 0 0 35px rgba(255,255,255,0.8);
+    }
+
+    /* Modal popup */
+    .modal {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0,0,0,0.7);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      visibility: hidden;
+      opacity: 0;
+      transition: 0.4s;
+    }
+    .modal.show {
+      visibility: visible;
+      opacity: 1;
+    }
+    .modal-content {
+      background: #fff;
+      color: #333;
+      padding: 30px;
+      border-radius: 15px;
+      max-width: 400px;
+      text-align: center;
+      box-shadow: 0 0 25px rgba(255,255,255,0.8);
+      animation: pop 0.5s ease;
+      position: relative;
+    }
+    @keyframes pop {
+      from { transform: scale(0.5); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+    .modal-content h2 {
+      margin: 0 0 15px;
+      font-size: 24px;
+      color: #e52e71;
+    }
+    .timer {
+      font-size: 20px;
+      font-weight: bold;
+      color: #ff0080;
+      margin-top: 10px;
+    }
+    .close-btn {
+      margin-top: 20px;
+      background: #e52e71;
+      color: #fff;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+    .close-btn:hover {
+      background: #ff8a00;
+    }
+  </style>
+</head>
+<body>
+  <h1>🎡 Spin the Wheel - Cybersecurity Quiz!</h1>
+  <div class="wheel-container">
+    <div class="pointer"></div>
+    <div class="wheel" id="wheel"></div>
+  </div>
+
+  <!-- Spin button -->
+  <button class="btn" onclick="spinWheel()">🎯 SPIN</button>
+
+  <!-- Modal -->
+  <div class="modal" id="modal">
+    <div class="modal-content">
+      <h2 id="modal-title">❓ Question</h2>
+      <p id="question-text"></p>
+      <p class="timer" id="timer"></p>
+      <button class="close-btn" onclick="closeModal()">Close</button>
+    </div>
+  </div>
+
+  <script>
+    const wheel = document.getElementById("wheel");
+    const modal = document.getElementById("modal");
+    const questionText = document.getElementById("question-text");
+    const timerEl = document.getElementById("timer");
+    const modalTitle = document.getElementById("modal-title");
+
+    const qa = [
+      { q: "What is phishing?", a: "A fake email or site tricking you into giving info." },
+      { q: "What is ransomware?", a: "Malware that locks files until you pay money." },
+      { q: "What does HTTPS mean?", a: "It means the site uses encryption." },
+      { q: "What is a strong password?", a: "A mix of letters, numbers, and symbols." },
+      { q: "What is 2FA?", a: "A login method with password + code/device." },
+      { q: "What is social engineering?", a: "Tricking people into revealing secrets." },
+      { q: "What is a firewall?", a: "A system filtering good and bad network traffic." },
+      { q: "What is spyware?", a: "Software that secretly collects your data." },
+      { q: "What is malware?", a: "Any harmful software." },
+      { q: "What is a DDoS attack?", a: "Flooding a website with fake traffic." },
+      { q: "Why is public Wi-Fi risky?", a: "Hackers can steal your unencrypted data." },
+      { q: "What is identity theft?", a: "Stealing personal details to impersonate you." },
+      { q: "What is encryption?", a: "Turning data into secret code." },
+      { q: "What is a VPN?", a: "It hides your location and secures internet." },
+      { q: "What is spear phishing?", a: "Targeted phishing at specific people." },
+      { q: "What is brute force attack?", a: "Guessing passwords by trying combos." },
+      { q: "What is patching?", a: "Updating software to fix security flaws." },
+      { q: "What is an insider threat?", a: "Risk from someone inside a company." },
+      { q: "What is keylogging?", a: "Recording keystrokes to steal data." },
+      { q: "What is ethical hacking?", a: "Using hacking skills legally to secure systems." },
+      { q: "What is multi-factor authentication?", a: "Login with two or more security checks." },
+      { q: "What is cloud security?", a: "Protecting data stored online." },
+      { q: "What is zero-day attack?", a: "Exploiting flaws before they’re fixed." },
+      { q: "What is a data breach?", a: "Unauthorized access to private data." },
+      { q: "What is digital footprint?", a: "The traces of your activity online." },
+      { q: "What is cyberbullying?", a: "Harassing someone online." },
+      { q: "What is shoulder surfing?", a: "Stealing info by looking over shoulders." },
+      { q: "What is a botnet?", a: "Hacked devices controlled by attackers." },
+      { q: "What is a Trojan horse?", a: "Malware disguised as a useful program." },
+      { q: "What is cyber hygiene?", a: "Daily practices to stay safe online." }
+    ];
+
+    let spinning = false;
+    let timerInterval;
+
+    function spinWheel() {
+      if (spinning) return; 
+      spinning = true;
+
+      const randomDeg = 1080 + Math.floor(Math.random() * 360);
+      wheel.style.transform = `rotate(${randomDeg}deg)`;
+
+      setTimeout(() => {
+        const actualDeg = randomDeg % 360;
+        const index = Math.floor(Math.random() * qa.length); // pick random question
+        showQuestion(index);
+        spinning = false;
+      }, 4000);
+    }
+
+    function showQuestion(index) {
+      modal.classList.add("show");
+      modalTitle.textContent = "❓ Question";
+      questionText.textContent = qa[index].q;
+
+      let timeLeft = 60; 
+      timerEl.textContent = `⏳ Time left: ${timeLeft}s`;
+
+      clearInterval(timerInterval);
+      timerInterval = setInterval(() => {
+        timeLeft--;
+        timerEl.textContent = `⏳ Time left: ${timeLeft}s`;
+        if (timeLeft <= 0) {
+          clearInterval(timerInterval);
+          showAnswer(index);
+        }
+      }, 1000);
+    }
+
+    function showAnswer(index) {
+      modalTitle.textContent = "✅ Answer";
+      questionText.textContent = qa[index].a;
+      timerEl.textContent = "";
+    }
+
+    function closeModal() {
+      modal.classList.remove("show");
+      clearInterval(timerInterval);
+    }
+  </script>
+</body>
+</html>
